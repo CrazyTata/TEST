@@ -77,6 +77,11 @@ print_r($private_properties);*/
 $name = $class->getMethods(); // 获取类的所有方法，父类的也能获取到，并且不管共有还是私有都能获取到 
 var_dump($name);
 
-/*getMethods()       来获取到类的所有methods。
+/*
+
+getMethods()       来获取到类的所有methods。
 hasMethod(string)  是否存在某个方法
-getMethod(string)  获取方法*/
+getMethod(string)  获取方法
+getDocComment()    获取注释信息
+
+*/
