@@ -147,12 +147,12 @@ class C {
 
 //测试构造函数的依赖注入
 // 使用Ioc来创建B类的实例，B的构造函数依赖A类，A的构造函数依赖C类。
-$bObj = Ioc::getInstance('B');
+/*$bObj = Ioc::getInstance('B');
 $bObj->bbb(); // 输出：this is C->cc ， 说明依赖注入成功。
 
 // 打印$bObj
 echo "<pre>";
-var_dump($bObj);
+var_dump($bObj);*/
 
 // 打印结果，可以看出B中有A实例，A中有C实例，说明依赖注入成功。
 /*object(B)#3 (1) {
@@ -170,3 +170,118 @@ var_dump($bObj);
 // 输出结果，可以看出依赖注入成功。
 //this is C->cc
 //params:this is param b
+
+class Power {
+    /**
+     * 能力值
+     */
+    protected $ability;
+
+    /**
+     * 能力范围或距离
+     */
+    protected $range;
+
+    public function __construct($ability, $range)
+    {
+        $this->ability = $ability;
+        $this->range = $range;
+    }
+}
+
+class Superman
+{
+    protected $module;
+
+    public function __construct(SuperModuleInterface $module)
+    {
+        $this->module = $module;
+    }
+}
+
+interface SuperModuleInterface
+{
+    /**
+     * 超能力激活方法
+     *
+     * 任何一个超能力都得有该方法，并拥有一个参数
+     *@param array $target 针对目标，可以是一个或多个，自己或他人
+     */
+    public function activate(array $target);
+}
+
+
+/**
+ * X-超能量
+ */
+class XPower implements SuperModuleInterface
+{
+    public function activate(array $target)
+    {
+        // 这只是个例子。。具体自行脑补
+    }
+}
+
+/**
+ * 终极炸弹 （就这么俗）
+ */
+class UltraBomb implements SuperModuleInterface
+{
+    public function activate(array $target)
+    {
+        // 这只是个例子。。具体自行脑补
+    }
+}
+
+
+class Container
+{
+    protected $binds;
+
+    protected $instances;
+
+    public function bind($abstract, $concrete)
+    {
+        if ($concrete instanceof Closure) {
+            $this->binds[$abstract] = $concrete;
+        } else {
+            $this->instances[$abstract] = $concrete;
+        }
+    }
+
+    public function make($abstract, $parameters = [])
+    {
+        if (isset($this->instances[$abstract])) {
+            return $this->instances[$abstract];
+        }
+
+        array_unshift($parameters, $this);
+
+        return call_user_func_array($this->binds[$abstract], $parameters);
+    }
+}
+
+// 创建一个容器（后面称作超级工厂）
+$container = new Container;
+
+// 向该 超级工厂添加超人的生产脚本
+$container->bind('superman', function($container, $moduleName) {
+    return new Superman($container->make($moduleName));
+});
+
+// 向该 超级工厂添加超能力模组的生产脚本
+$container->bind('xpower', function($container) {
+    return new XPower;
+});
+
+// 同上
+$container->bind('ultrabomb', function($container) {
+    return new UltraBomb;
+});
+
+// ****************** 华丽丽的分割线 **********************
+// 开始启动生产
+$superman_1 = $container->make('superman', 'xpower');
+$superman_2 = $container->make('superman', 'ultrabomb');
+$superman_3 = $container->make('superman', 'xpower');
+// ...随意添加
